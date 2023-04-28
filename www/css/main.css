@@ -1,0 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Fira+Sans+Condensed:wght@300&family=Major+Mono+Display&display=swap');
+
+:root {
+    --background-color: rgb(29, 29, 29);
+    --divider-color: rgba(255, 255, 255, 0.05);
+    --text-color: #ffffff;
+}
+
+
+html {
+    background-color: rgb(24,24,24);
+    /* background: url(/img/background.png) no-repeat center center fixed;  */
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+}
