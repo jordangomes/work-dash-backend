@@ -1,17 +1,19 @@
 <script>
     import axios from "../libs/axios.min.js";
+    import Cookies from "/js/libs/jscookie.min.js";
+
     export default {
         data() {
             return {
                 interval: null,
-                servers: []
+                feed: []
             }
         },
         mounted() {
             this.interval = setInterval(() => {
                 let token = Cookies.get("auth")
                 axios
-                .get("/api/ping", {
+                .get("/api/rss/feed", {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }
@@ -19,15 +21,15 @@
                 .then(response => {
                     if (response.status == 200) {
                         const data = response.data;
-                        console.log(data)
-                        this.servers = [] 
-                        data.forEach(rawping => {
-                            let ping = {};
-                            ping.name = rawping.label;
-                            ping.ping = rawping.ping;
-                            ping.down = (rawping.error == "") ? false : true
+                        this.feed = [] 
+                        data.forEach(feeditem => {
+                            let item = {};
 
-                            this.servers.push(ping)
+                            item.source_label = feeditem.source_label
+                            item.title = feeditem.title
+                            item.important = feeditem.important && !feeditem.dismissed ? "important" : ""
+
+                            this.feed.push(item)
                         });
                     } else if (response.status == 401) {
                         document.location.href="/login";
@@ -48,23 +50,22 @@
 </script>
 
 <template>
-    <div class="servers">
-        <h2>servers</h2>
-        <div class="server" v-for="{name, ping, down} in servers">
-            <div class="name danger" v-if="down">{{ name }}</div>
-            <div class="ping danger" v-if="down">down</div>
-            <div class="name" v-if="!down">{{ name }}</div>
-            <div class="ping warn" v-if="ping > 60">{{ ping }}ms</div>
-            <div class="ping" v-if="ping <= 60 && !down">{{ ping }}ms</div>
+    <div class="feed">
+        <h2>feed</h2>
+        <div class="article" v-for="{title, source_label, important} in feed">
+            <div :class="['source_label', important]">{{ source_label }}</div>
+            <div :class="['title', important]">{{ title }}</div>
         </div>
     </div>
 </template>
 
 <style>
+
     h2 {
         margin: 10px 5px;
     }
-    .servers {
+
+    .feed {
         -ms-grid-column-span: 2;
         position: relative;
         padding: 20px;
@@ -75,23 +76,26 @@
         color: var(--text-color);
         font-family: 'Major Mono Display', monospace;
     }
-    .server {
-        display: flex;
-        justify-content: space-between;
+    .article {
+        /* display: flex;
+        justify-content: space-between; */
+        padding: 10px 0px;
         border-bottom: 3px solid var(--divider-color);
     }
-    .server .name {
-        letter-spacing: -4px;
-        font-size: 32px;
-        text-transform: lowercase;
+    .article .title.important {
+        color: #f84d47
     }
-    .server .ping {
-        width: 50px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 20px;
+    .article .source_label.important {
+        color: #f84d47
     }
-    .server .warn { color: #f8ac47 }
-    .server .danger { color: #f84d47 }
+    .article .title {
+        font-family: 'Raleway', sans-serif;
+        font-size: 18px;
+        color: var(--text-color);
+    }
+    .article .source_label {
+        padding-bottom: 5px;
+        font-size: 16px;
+        /* text-transform: lowercase; */
+    }
 </style>

@@ -1,15 +1,43 @@
 <script>
-    import axios from "../libs/axios.min.js";
+    import axios from "/js/libs/axios.min.js";
+    import Cookies from "/js/libs/jscookie.min.js";
+
     export default {
         data() {
             return {
+                interval: null,
                 reminders: []
             }
         },
         mounted() {
-            axios
-                .get("/api/reminders")
-                .then(response => (this.reminders = response.data));
+            this.interval = setInterval(() => {
+                let token = Cookies.get("auth")
+                axios
+                .get("/api/reminders/active", {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
+                .then(response => {
+                    if (response.status == 200) {
+                        const data = response.data;
+                        this.reminders = [] 
+                        data.forEach(reminder => {
+                            this.reminders.push(reminder)
+                        });
+                    }
+                }).catch(function (error) {
+                    if (error.response) {
+                        if(error.response.status ==401) {
+                            document.location.href="/login";
+                        }
+                    console.log(error.response.data);
+                    console.log(error.response.status);
+                    console.log(error.response.headers);
+                    }
+                });
+            }, 5000)
+            let token = Cookies.get("auth")
         }
     } 
 </script>
@@ -48,7 +76,7 @@
         border-bottom: 3px solid var(--divider-color);
     }
     .reminder .title {
-        font-family: 'Fira Sans Condensed', sans-serif;
+        font-family: 'Raleway', sans-serif;
         width: 260px;
         font-size: 20px;
         color: var(--text-color);

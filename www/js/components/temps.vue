@@ -1,22 +1,69 @@
 <script>
+    import axios from "../libs/axios.min.js";
     export default {
         data() {
             return {
-                temps: [
-                    {location: "l17", temp: "30", status: "danger"},
-                    {location: "l18", temp: "22", status: "normal"},
-                    {location: "l19", temp: "26", status: "warn"},
-                ]
-            };
+                interval: null,
+                temps: []
+            }
+        },
+        mounted() {
+            this.interval = setInterval(() => {
+                let token = Cookies.get("auth")
+                axios
+                .get("/api/temperatures", {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
+                .then(response => {
+                    if (response.status == 200) {
+                        const data = response.data;
+                        this.temps = [] 
+                        data.forEach(rawtemp => {
+                            let temp = {};
+
+                            temp.location = rawtemp.label
+                            temp.temp = rawtemp.temp
+
+                            let online = (rawtemp.last_set_time > (Math.floor(Date.now() / 1000) - 60))
+                            if (!online) { 
+                                temp.status = "offline" 
+                            } else if (temp.temp >= 28) { 
+                                temp.status = "danger" 
+                            } else if(temp.temp >= 26) { 
+                                temp.status = "warn" 
+                            } else { 
+                                temp.status = "normal" 
+                            }
+                            this.temps.push(temp)
+                        });
+                    } else if (response.status == 401) {
+                        document.location.href="/login";
+                    }
+                }).catch(function (error) {
+                    if (error.response) {
+                        if(error.response.status ==401) {
+                            document.location.href="/login";
+                        }
+                    console.log(error.response.data);
+                    console.log(error.response.status);
+                    console.log(error.response.headers);
+                    }
+                });;
+            }, 5000)
         }
-    };
+    } 
 </script>
 
 <template>
     <div class="temps">
         <h2>comms rooms</h2>
         <div class="temp" v-for="{location, temp, status} in temps">
-            <div :class="['temprature', status]">{{ temp }}ºC</div>
+            <div :class="['temprature', status]">
+                <span v-if="status == 'offline'">offline</span>
+                <span v-else>{{ temp }}ºC</span>
+            </div>
             <div class="location">{{ location }}</div>
         </div>
     </div>
@@ -53,6 +100,8 @@
     .temp .temprature.normal { color: #ffffff }
     .temp .temprature.warn { color: #f8ac47 }
     .temp .temprature.danger { color: #f84d47 }
+    .temp .temprature.offline { color: #f84d47 }
+
     .temp .location {
         width: 50px;
         display: flex;

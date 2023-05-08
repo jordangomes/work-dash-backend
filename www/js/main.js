@@ -32,5 +32,8 @@ const app = createApp({
     Dashboard: Vue.defineAsyncComponent(() =>
         loadModule('js/pages/dashboard.vue', options)
     ),
+    Login: Vue.defineAsyncComponent(() =>
+        loadModule('js/pages/login.vue', options)
+    ),
   },
 }).mount('#app');

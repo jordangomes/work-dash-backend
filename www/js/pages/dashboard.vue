@@ -5,8 +5,8 @@
   import Image from '/js/components/image.vue'
   import Reminders from '/js/components/reminders.vue'
   import Status from '/js/components/status.vue'
-
-</script>`;
+  import Rss from '/js/components/rss.vue'
+</script>
 
 <template>
     <div class="body">
@@ -32,13 +32,17 @@
                 </div>
                 <!-- COLUMN 5 -->
                 <div class="col5width1 row1height1">
-                    <Status name="jordan" image="jordan.jpg" status="busy"/>
+                    <Status name="jordan" image="jordan.jpg" status="unkown"/>
                 </div>
                 <div class="col6width1 row1height1">
-                    <Status name="lachlan" image="lachlan.jpg" status="free"/>
+                    <Status name="lachlan" image="lachlan.jpg" status="unkown"/>
                 </div>
                 <div class="col5width2 row2height4">
                     <Reminders />
+                </div>
+                <!-- COLUMN 8 -->
+                <div class="col7width4 row1height5">
+                    <Rss />
                 </div>
             </main>
         </div>

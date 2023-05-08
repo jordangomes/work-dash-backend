@@ -1,15 +1,21 @@
 use crate::reminders::ReminderError;
 use crate::users::UserError;
+use hmac::Hmac;
 use serde::Serialize;
-use sqlx::{Pool, Sqlite, SqlitePool};
+use sha2::Sha256;
+use sqlx::{SqlitePool};
 use actix_web::{error::ResponseError, http::StatusCode, HttpResponse};
 use thiserror::Error;
 
 pub mod users;
 pub mod reminders;
+pub mod temperatures;
+pub mod rss;
+pub mod ping;
 
 pub struct AppState {
-    pub db_pool: SqlitePool
+    pub db_pool: SqlitePool,
+    pub jwt_key: Hmac<Sha256>,
 }
 
 #[derive(Error, Debug)]
@@ -23,7 +29,9 @@ pub enum AppError {
     #[error(transparent)]
     JSONError(#[from] serde_json::Error),
     #[error(transparent)]
-    IOError(#[from] std::io::Error)
+    IOError(#[from] std::io::Error),
+    #[error(transparent)]
+    TimeError(#[from] std::time::SystemTimeError)
 }
 
 #[derive(Serialize)]
@@ -39,6 +47,7 @@ impl ResponseError for AppError {
             AppError::ReminderError(_) => StatusCode::INTERNAL_SERVER_ERROR,
             AppError::JSONError(_) => StatusCode::INTERNAL_SERVER_ERROR,
             AppError::IOError(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            AppError::TimeError(_) => StatusCode::INTERNAL_SERVER_ERROR,
             AppError::UserError(_) => todo!(),
         }
     }

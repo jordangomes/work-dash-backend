@@ -1,2 +1,7 @@
 /target
+/CA
 data.db
+data.db-shm
+data.db-wal
+*.pem
+.env
